@@ -44,6 +44,16 @@ namespace CosmosDBLabb4
         private async Task GetStartedDemo()
         {
             this.client = new DocumentClient(new Uri(EndpointUrl), PrimaryKey);
+
+            await this.client.CreateDatabaseIfNotExistsAsync(new Database { Id = "DBLabb4" });
+            await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "Användare" });
+
+        }
+        private void WriteToConsoleAndPromptToContinue(string format, params object[] args)
+        {
+            Console.WriteLine(format, args);
+            Console.WriteLine("Press any key to continue ...");
+            Console.ReadKey();
         }
 
     }
