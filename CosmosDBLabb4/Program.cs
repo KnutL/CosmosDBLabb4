@@ -48,7 +48,8 @@ namespace CosmosDBLabb4
             this.client = new DocumentClient(new Uri(EndpointUrl), PrimaryKey);
 
             await this.client.CreateDatabaseIfNotExistsAsync(new Database { Id = "DBLabb4" });
-
+            await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "Anvädare" });
+            await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "BildGodkänd" });
             await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "BildSkaGranskas" });
         }
 
