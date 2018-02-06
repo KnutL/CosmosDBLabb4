@@ -16,9 +16,11 @@ namespace CosmosDBLabb4
         private const string PrimaryKey = "TryyZUkiERWKMOI0hD4jm6FICq7JvBEYUeXTm4nN6aG3xfZriSyhpAYuwScSKU2qkdvVkuBqzJz4Ey2QcPgDng==";
         private DocumentClient client;
 
+        private string legitEmail = @"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$";
+        private string legitURL = @"/(https?:\/\/.*\.(?:png|jpg|jpeg))/i";
+
         static void Main(string[] args)
         {
-
             try
             {
                 Program p = new Program();
@@ -46,34 +48,9 @@ namespace CosmosDBLabb4
             this.client = new DocumentClient(new Uri(EndpointUrl), PrimaryKey);
 
             await this.client.CreateDatabaseIfNotExistsAsync(new Database { Id = "DBLabb4" });
-            await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "Användare" });
-            await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "BildGranskad" });
-            await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "BildInteGranskad" });
-            Labb användare = new Labb
-            {
-                Id = "Användare",
-                användare = new Användare[]
-                {
 
-                new Användare { FirstName = "Christoffer", Email = "christoffer@hotmail.com" },
-                new Användare { FirstName = "Knut", Email = "knutte@hotmail.com" }
-                }
-            };
-            await this.CreateFamilyDocumentIfNotExists("DBLabb4", "Användare", användare);
-
-            Labb bildgranskad = new Labb
-            {
-                Id = "Bild Granskad",
-                bildGranskad = new BildGranskad[]
-                    {
-                new BildGranskad { FirstName = "Christoffer", URL = "https://media.discordapp.net/attachments/395942679982112778/403658969047891970/bandit.png" },
-                    }
-            };
-            await this.CreateFamilyDocumentIfNotExists("DBLabb4", "BildGranskad", bildgranskad);
+            await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "BildSkaGranskas" });
         }
-
-        
-
 
         private void WriteToConsoleAndPromptToContinue(string format, params object[] args)
         {
@@ -81,55 +58,41 @@ namespace CosmosDBLabb4
             Console.WriteLine("Press any key to continue ...");
             Console.ReadKey();
         }
-        public class Labb
-        {
-            [JsonProperty(PropertyName = "id")]
-            public string Id { get; set; }
-            public Användare[] användare { get; set; }
-            public BildGranskad[] bildGranskad { get; set; }
-            public BildInteGranskad bildInteGranskad { get; set; }
-            public override string ToString()
-            {
-                return JsonConvert.SerializeObject(this);
-            }
-        }
-        public class Användare
-        {
-
-            public string FirstName { get; set; }
-            public string Email { get; set; }
-        }
-        public class BildGranskad
-        {
-
-            public string FirstName { get; set; }
-            public string URL { get; set; }
-        }
-        public class BildInteGranskad
-        {
-
-            public string FirstName { get; set; }
-            public string URL { get; set; }
-        }
-        private async Task CreateFamilyDocumentIfNotExists(string databaseName, string collectionName, Labb labb)
+        private async Task CreateFamilyDocumentIfNotExists(string databaseName, string collectionName, User user)
         {
             try
             {
-                await this.client.ReadDocumentAsync(UriFactory.CreateDocumentUri(databaseName, collectionName, labb.Id));
-                this.WriteToConsoleAndPromptToContinue("Found {0}", labb.Id);
+                await this.client.ReadDocumentAsync(UriFactory.CreateDocumentUri(databaseName, collectionName, user.Id));
+                this.WriteToConsoleAndPromptToContinue("Found {0}", user.Id);
             }
             catch (DocumentClientException de)
             {
                 if (de.StatusCode == HttpStatusCode.NotFound)
                 {
-                    await this.client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(databaseName, collectionName), labb);
-                    this.WriteToConsoleAndPromptToContinue("Created Labb {0}", labb.Id);
+                    await this.client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(databaseName, collectionName), user);
+                    this.WriteToConsoleAndPromptToContinue("Created User {0}", user.Id);
                 }
                 else
                 {
                     throw;
                 }
             }
+        }
+        private void ViewAnvändare(string databaseName, string collectionName)
+        {
+
+            IQueryable<User> userQuery = this.client.CreateDocumentQuery<User>(
+                    UriFactory.CreateDocumentCollectionUri(databaseName, collectionName),
+                    "SELECT * FROM User");
+
+            Console.WriteLine("Viewing review queue collection:");
+            foreach (User user in userQuery)
+            {
+                Console.WriteLine($"\t{user}");
+            }
+
+            Console.WriteLine("Press any key to continue ...");
+            Console.ReadKey();
         }
 
     }
