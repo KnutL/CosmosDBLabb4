@@ -13,6 +13,7 @@ namespace CosmosDBLabb4
     class User
     {
         [JsonProperty(PropertyName ="id")]
+        public int id { get; set; }
         public string email { get; set; }
         public string bildUrl { get; set; }
         public override string ToString()

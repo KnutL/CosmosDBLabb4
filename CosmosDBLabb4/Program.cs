@@ -18,7 +18,7 @@ namespace CosmosDBLabb4
 
         static void Main(string[] args)
         {
-
+             
             try
             {
                 Program p = new Program();
