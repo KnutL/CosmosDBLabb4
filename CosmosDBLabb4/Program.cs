@@ -7,6 +7,7 @@ using System.Net;
 using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace CosmosDBLabb4
 {
@@ -17,7 +18,6 @@ namespace CosmosDBLabb4
         private DocumentClient client;
 
         private string legitEmail = @"^\w+([-+.']\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$";
-        private string legitURL = @"/(https?:\/\/.*\.(?:png|jpg|jpeg))/i";
 
         static void Main(string[] args)
         {
@@ -51,6 +51,43 @@ namespace CosmosDBLabb4
             await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "Anvädare" });
             await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "BildGodkänd" });
             await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "BildSkaGranskas" });
+
+            Console.WriteLine("Vad vill du göra?");
+            Console.WriteLine("1. Lägg till ny användare.\n2. Se vilka användare som ska granskas.\n3.Avsluta.");
+            int input = int.Parse(Console.ReadLine());
+            bool running = true;
+            while (running)
+            {
+                if (input == 1)
+                {
+                    Console.WriteLine("Lägg till en email: ");
+                    string email = Console.ReadLine();
+                    var regexEmail = Regex.IsMatch(email, legitEmail);
+                    if (regexEmail == false)
+                    {
+                        Console.WriteLine("Ogiltig email formatering.");
+                    }
+                    else
+                    {
+                        Console.WriteLine("Lägg till en profilbild: ");
+                        string pbUrl = Console.ReadLine();
+                        var user = new User { Email = email, BildUrl = pbUrl };
+                        await this.CreateFamilyDocumentIfNotExists("DBLabb4", "BildSkaGranskas", user);
+                    }
+                }
+                else if (input == 2)
+                {
+                    this.ViewAnvändare("DBLabb4", "BildSkaGranskas");
+                }
+                else if (input == 3)
+                {
+                    running = false;
+                }
+                else
+                {
+                    Console.WriteLine("Fel input");
+                }
+            }
         }
 
         private void WriteToConsoleAndPromptToContinue(string format, params object[] args)
@@ -63,15 +100,15 @@ namespace CosmosDBLabb4
         {
             try
             {
-                await this.client.ReadDocumentAsync(UriFactory.CreateDocumentUri(databaseName, collectionName, user.email));
-                this.WriteToConsoleAndPromptToContinue("Found {0}", user.id);
+                await this.client.ReadDocumentAsync(UriFactory.CreateDocumentUri(databaseName, collectionName, user.Email));
+                this.WriteToConsoleAndPromptToContinue($"Användaren {user.Email} finns redan.");
             }
             catch (DocumentClientException de)
             {
                 if (de.StatusCode == HttpStatusCode.NotFound)
                 {
                     await this.client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(databaseName, collectionName), user);
-                    this.WriteToConsoleAndPromptToContinue("Created User {0}", user.id);
+                    this.WriteToConsoleAndPromptToContinue($"Skapade användaren {user.Email}");
                 }
                 else
                 {

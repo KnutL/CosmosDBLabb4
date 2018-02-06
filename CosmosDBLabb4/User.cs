@@ -14,8 +14,8 @@ namespace CosmosDBLabb4
     {
         [JsonProperty(PropertyName ="id")]
         public int id { get; set; }
-        public string email { get; set; }
-        public string bildUrl { get; set; }
+        public string Email { get; set; }
+        public string BildUrl { get; set; }
         public override string ToString()
         {
             return JsonConvert.SerializeObject(this);
