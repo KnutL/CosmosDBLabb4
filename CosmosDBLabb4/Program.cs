@@ -62,15 +62,15 @@ namespace CosmosDBLabb4
         {
             try
             {
-                await this.client.ReadDocumentAsync(UriFactory.CreateDocumentUri(databaseName, collectionName, user.Id));
-                this.WriteToConsoleAndPromptToContinue("Found {0}", user.Id);
+                await this.client.ReadDocumentAsync(UriFactory.CreateDocumentUri(databaseName, collectionName, user.email));
+                this.WriteToConsoleAndPromptToContinue("Found {0}", user.id);
             }
             catch (DocumentClientException de)
             {
                 if (de.StatusCode == HttpStatusCode.NotFound)
                 {
                     await this.client.CreateDocumentAsync(UriFactory.CreateDocumentCollectionUri(databaseName, collectionName), user);
-                    this.WriteToConsoleAndPromptToContinue("Created User {0}", user.Id);
+                    this.WriteToConsoleAndPromptToContinue("Created User {0}", user.id);
                 }
                 else
                 {
