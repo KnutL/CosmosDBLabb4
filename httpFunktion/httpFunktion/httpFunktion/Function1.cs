@@ -1,3 +1,5 @@
+using System;
+using Microsoft.Azure.Documents.Client;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -5,6 +7,7 @@ using System.Threading.Tasks;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Host;
+using System.Collections.Generic;
 
 namespace httpFunktion
 {
@@ -13,22 +16,45 @@ namespace httpFunktion
         [FunctionName("Function1")]
         public static async Task<HttpResponseMessage> Run([HttpTrigger(AuthorizationLevel.Function, "get", "post", Route = null)]HttpRequestMessage req, TraceWriter log)
         {
-            log.Info("C# HTTP trigger function processed a request.");
+            log.Info("DBLabb4 Connection");
+            string mode = req.GetQueryNameValuePairs()
+                        .FirstOrDefault(q => string.Compare(q.Key, "mode", true) == 0)
+                        .Value;
 
-            // parse query parameter
-            string name = req.GetQueryNameValuePairs()
-                .FirstOrDefault(q => string.Compare(q.Key, "name", true) == 0)
-                .Value;
+            var user = GetUser(mode);
+            if (mode == "BildSkaGranskas")
+            {
+                return req.CreateResponse(HttpStatusCode.OK, user, "application/json");
+            }
+            else if (mode != "BildSkaGranskas" && mode != null)
+            {
+                return req.CreateResponse(HttpStatusCode.BadRequest, "Incorrect input.Please pass the following command/s to view DB:\n?mode=BildSkaGranskas");
+            }
+            else
+            {
+                return req.CreateResponse(HttpStatusCode.BadRequest, "Use the following command/s to view DB:\n?mode = BildSkaGranskas");
+            }
+        }
 
-            // Get request body
-            dynamic data = await req.Content.ReadAsAsync<object>();
+        // Reads ReviewQueueCollection from CosmosDB
+        private static List<user> GetUser(string id)
+        {
+            string EndpointUrl = "https://labb4cosmos.documents.azure.com:443/";
 
-            // Set name to query string or body data
-            name = name ?? data?.name;
+            string PrimaryKey = "TryyZUkiERWKMOI0hD4jm6FICq7JvBEYUeXTm4nN6aG3xfZriSyhpAYuwScSKU2qkdvVkuBqzJz4Ey2QcPgDng==";
 
-            return name == null
-                ? req.CreateResponse(HttpStatusCode.BadRequest, "Please pass a name on the query string or in the request body")
-                : req.CreateResponse(HttpStatusCode.OK, "Hello " + name);
+            string databaseName = "DBLabb4";
+
+            string collectionName = "BildSkaGranskas";
+
+            var client = new DocumentClient(new Uri(EndpointUrl), PrimaryKey);
+
+            var userQuery = client.CreateDocumentQuery<user>(
+                UriFactory.CreateDocumentCollectionUri(databaseName, collectionName), "SELECT * FROM " + collectionName);
+
+            var user = userQuery.ToList();
+
+            return user;
         }
     }
 }
