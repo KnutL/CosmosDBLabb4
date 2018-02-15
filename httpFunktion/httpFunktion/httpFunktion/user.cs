@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace httpFunktion
 {
-    class user
+    public class user
     {
+        public string id { get; set; }
+        public string BildUrl { get; set; }
     }
 }
