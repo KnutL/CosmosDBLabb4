@@ -38,8 +38,7 @@ namespace CosmosDBLabb4
             }
             finally
             {
-                Console.WriteLine("Press any key to exit.");
-                Console.ReadKey();
+                Console.WriteLine("Exiting....");
             }
 
         }
@@ -52,40 +51,41 @@ namespace CosmosDBLabb4
             await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "BildGodkänd" });
             await this.client.CreateDocumentCollectionIfNotExistsAsync(UriFactory.CreateDatabaseUri("DBLabb4"), new DocumentCollection { Id = "BildSkaGranskas" });
 
-            Console.WriteLine("Vad vill du göra?");
-            Console.WriteLine("1. Lägg till ny användare.\n2. Se vilka användare som ska granskas.\n3.Avsluta.");
-            int input = int.Parse(Console.ReadLine());
-            bool running = true;
-            while (running)
+            bool programRunning = true;
+            while (programRunning)
             {
-                if (input == 1)
+                Console.WriteLine("Vad vill du göra?");
+                Console.WriteLine("1. Lägg till ny användare.\n2. Se vilka användare som ska granskas.\n3. Avsluta.");
+                string userChoice = Console.ReadLine();
+                switch (userChoice)
                 {
-                    Console.WriteLine("Lägg till en email: ");
-                    string email = Console.ReadLine();
-                    var regexEmail = Regex.IsMatch(email, legitEmail);
-                    if (regexEmail == false)
-                    {
-                        Console.WriteLine("Ogiltig email formatering.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Lägg till en profilbild: ");
-                        string pbUrl = Console.ReadLine();
-                        var user = new User { Email = email, BildUrl = pbUrl };
-                        await this.CreateFamilyDocumentIfNotExists("DBLabb4", "BildSkaGranskas", user);
-                    }
-                }
-                else if (input == 2)
-                {
-                    this.ViewAnvändare("DBLabb4", "BildSkaGranskas");
-                }
-                else if (input == 3)
-                {
-                    running = false;
-                }
-                else
-                {
-                    Console.WriteLine("Fel input");
+                    case "1":
+                        Console.WriteLine("Lägg till en email: ");
+                        string email = Console.ReadLine();
+                        var regexEmail = Regex.IsMatch(email, legitEmail);
+                        if (regexEmail == false)
+                        {
+                            Console.WriteLine("Ogiltig email formatering.");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Lägg till en profilbild: ");
+                            string pbUrl = Console.ReadLine();
+                            var user = new User { Email = email, BildUrl = pbUrl };
+                            await this.CreateFamilyDocumentIfNotExists("DBLabb4", "BildSkaGranskas", user);
+                        }
+                        break;
+                    case "2":
+                        this.ViewAnvändare("DBLabb4", "BildSkaGranskas");
+                        break;
+                    case "3":
+                        programRunning = false;
+                        break;
+                    default:
+                        Console.WriteLine("You must enter a valid number. Press enter one time");
+                        Console.ReadKey();
+                        Console.Clear();
+                        break;
                 }
             }
         }
