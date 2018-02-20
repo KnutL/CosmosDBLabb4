@@ -36,9 +36,9 @@ namespace httpFunktion
             }
         }
 
-        // Reads ReviewQueueCollection from CosmosDB
+        // Läser in BildSkaGranskas från CosmosDB
         private static List<user> GetUser(string id)
-        {
+        {   
             string EndpointUrl = "https://labb4cosmos.documents.azure.com:443/";
 
             string PrimaryKey = "TryyZUkiERWKMOI0hD4jm6FICq7JvBEYUeXTm4nN6aG3xfZriSyhpAYuwScSKU2qkdvVkuBqzJz4Ey2QcPgDng==";

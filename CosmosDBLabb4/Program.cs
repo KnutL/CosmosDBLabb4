@@ -38,7 +38,7 @@ namespace CosmosDBLabb4
             }
             finally
             {
-                Console.WriteLine("End of demo, press any key to exit.");
+                Console.WriteLine("Press any key to exit.");
                 Console.ReadKey();
             }
 
@@ -101,7 +101,7 @@ namespace CosmosDBLabb4
             try
             {
                 await this.client.ReadDocumentAsync(UriFactory.CreateDocumentUri(databaseName, collectionName, user.Email));
-                this.WriteToConsoleAndPromptToContinue($"Användaren {user.Email} finns redan.");
+                this.WriteToConsoleAndPromptToContinue($"Användaren {user.Email} finns redan.\n");
             }
             catch (DocumentClientException de)
             {
